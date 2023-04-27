@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - secure_key (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - secure_key (from `.symlinks/plugins/secure_key/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  secure_key:
+    :path: ".symlinks/plugins/secure_key/ios"
+
+SPEC CHECKSUMS:
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  secure_key: 3272d2b4e316c9e2d47c7397a3d7d20c8bdbdddf
+
+PODFILE CHECKSUM: 4e8f8b2be68aeea4c0d5beb6ff1e79fface1d048
+
+COCOAPODS: 1.11.3

@@ -5,13 +5,26 @@ import 'secure_key_platform_interface.dart';
 
 /// An implementation of [SecureKeyPlatform] that uses method channels.
 class MethodChannelSecureKey extends SecureKeyPlatform {
-  /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel = const MethodChannel('secure_key');
 
   @override
-  Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
+  Future<void> createPairKey() async {
+    await methodChannel.invokeMethod<void>('createPairKey');
+  }
+
+  @override
+  Future<void> getPublicKey() async {
+    await methodChannel.invokeMethod<void>('getPublicKey');
+  }
+
+  @override
+  Future<void> getPublicKeyData() async {
+    await methodChannel.invokeMethod<void>('getPublicKeyData');
+  }
+
+  @override
+  Future<void> getPrivatekey() async {
+    await methodChannel.invokeMethod<void>('getPrivatekey');
   }
 }

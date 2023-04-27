@@ -23,7 +23,19 @@ abstract class SecureKeyPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+  Future<void> createPairKey() {
+    throw UnimplementedError('createPairKey() has not been implemented.');
+  }
+
+  Future<void> getPublicKey() {
+    throw UnimplementedError('getPublicKey() has not been implemented.');
+  }
+
+  Future<void> getPublicKeyData() {
+    throw UnimplementedError('getPublicKeyData() has not been implemented.');
+  }
+
+  Future<void> getPrivatekey() async {
+    throw UnimplementedError('getPrivatekey() has not been implemented.');
   }
 }
