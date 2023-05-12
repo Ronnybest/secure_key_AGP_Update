@@ -17,6 +17,8 @@ class _MyAppState extends State<MyApp> {
 
   int? level;
 
+  List<String> llll = [];
+
   @override
   void initState() {
     super.initState();
@@ -33,31 +35,60 @@ class _MyAppState extends State<MyApp> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
-              width: double.maxFinite,
-            ),
             OutlinedButton(
                 onPressed: () async {
-                  await _secureKeyPlugin.createPairKey();
+                  try {
+                    var result = await _secureKeyPlugin.initialize();
+                    print('INIT:$result');
+                  } catch (e) {
+                    print('INIT:\n $e');
+                  }
+                },
+                child: const Text('INIT')),
+            const SizedBox(height: 16),
+            OutlinedButton(
+                onPressed: () async {
+                  try {
+                    var result = await _secureKeyPlugin.createPairKey();
+                    print('Create:$result');
+                  } catch (e) {
+                    print('Create:\n$e');
+                  }
                 },
                 child: const Text('Create')),
             const SizedBox(height: 16),
             OutlinedButton(
                 onPressed: () async {
-                  await _secureKeyPlugin.getPublicKey();
+                  try {
+                    var result = await _secureKeyPlugin.deleteKey();
+                    print('DELETE:$result');
+                  } catch (e) {
+                    print('DELETE:\n$e');
+                  }
+                },
+                child: const Text('DELETE')),
+            const SizedBox(height: 16),
+            OutlinedButton(
+                onPressed: () async {
+                  try {
+                    var result = await _secureKeyPlugin.getPublicKey();
+                    print('GET:$result');
+                  } catch (e) {
+                    print('GET:\n$e');
+                  }
                 },
                 child: const Text('Get key')),
             const SizedBox(height: 16),
             OutlinedButton(
                 onPressed: () async {
-                  await _secureKeyPlugin.getPublicKeyData();
+                  try {
+                    var result = await _secureKeyPlugin.signSha256('1234');
+                    print('SIGN:$result');
+                  } catch (e) {
+                    print('SIGN:\n$e');
+                  }
                 },
-                child: const Text('Get data')),
-            OutlinedButton(
-                onPressed: () async {
-                  await _secureKeyPlugin.getPrivatekey();
-                },
-                child: const Text('Get Private Key')),
+                child: const Text('Sign sha 256')),
           ],
         ),
       ),

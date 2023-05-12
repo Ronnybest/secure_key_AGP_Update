@@ -1,5 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="kg.storekey.secure_key_example">
+
+   <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+   <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+
    <application
         android:label="secure_key_example"
         android:name="${applicationName}"

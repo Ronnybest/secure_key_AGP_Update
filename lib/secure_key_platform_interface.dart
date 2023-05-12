@@ -23,19 +23,23 @@ abstract class SecureKeyPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<void> createPairKey() {
-    throw UnimplementedError('createPairKey() has not been implemented.');
+  Future<bool> initialize(int size) {
+    throw UnimplementedError('initialize() has not been implemented.');
   }
 
-  Future<void> getPublicKey() {
+  Future<String?> getPublicKey() {
     throw UnimplementedError('getPublicKey() has not been implemented.');
   }
 
-  Future<void> getPublicKeyData() {
-    throw UnimplementedError('getPublicKeyData() has not been implemented.');
+  Future<bool> createPairKey() {
+    throw UnimplementedError('createPairKey() has not been implemented.');
   }
 
-  Future<void> getPrivatekey() async {
-    throw UnimplementedError('getPrivatekey() has not been implemented.');
+  Future<bool> deleteKey() async {
+    throw UnimplementedError('deleteKey() has not been implemented.');
+  }
+
+  Future<String?> signSha256(String input) {
+    throw UnimplementedError('signSha256() has not been implemented.');
   }
 }

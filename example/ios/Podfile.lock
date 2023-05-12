@@ -1,20 +1,26 @@
 PODS:
   - Flutter (1.0.0)
+  - permission_handler_apple (9.0.4):
+    - Flutter
   - secure_key (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - secure_key (from `.symlinks/plugins/secure_key/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  permission_handler_apple:
+    :path: ".symlinks/plugins/permission_handler_apple/ios"
   secure_key:
     :path: ".symlinks/plugins/secure_key/ios"
 
 SPEC CHECKSUMS:
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce
   secure_key: 3272d2b4e316c9e2d47c7397a3d7d20c8bdbdddf
 
 PODFILE CHECKSUM: 4e8f8b2be68aeea4c0d5beb6ff1e79fface1d048

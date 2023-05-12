@@ -9,22 +9,32 @@ class MethodChannelSecureKey extends SecureKeyPlatform {
   final methodChannel = const MethodChannel('secure_key');
 
   @override
-  Future<void> createPairKey() async {
-    await methodChannel.invokeMethod<void>('createPairKey');
+  Future<bool> initialize(int size) async {
+    final result =
+        await methodChannel.invokeMethod<bool>('initialize', {'size': size});
+    return result ?? false;
   }
 
   @override
-  Future<void> getPublicKey() async {
-    await methodChannel.invokeMethod<void>('getPublicKey');
+  Future<String?> getPublicKey() async {
+    return await methodChannel.invokeMethod<String>('getPublicKey');
   }
 
   @override
-  Future<void> getPublicKeyData() async {
-    await methodChannel.invokeMethod<void>('getPublicKeyData');
+  Future<bool> createPairKey() async {
+    final result = await methodChannel.invokeMethod<bool>('createPairKey');
+    return result ?? false;
   }
 
   @override
-  Future<void> getPrivatekey() async {
-    await methodChannel.invokeMethod<void>('getPrivatekey');
+  Future<bool> deleteKey() async {
+    final result = await methodChannel.invokeMethod<bool?>('deleteKey');
+    return result ?? false;
+  }
+
+  @override
+  Future<String?> signSha256(String input) async {
+    return await methodChannel
+        .invokeMethod<String>('signSha256', {'inputSha256': input});
   }
 }

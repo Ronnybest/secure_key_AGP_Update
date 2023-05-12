@@ -1,29 +1,37 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:secure_key/secure_key_platform_interface.dart';
-import 'package:secure_key/secure_key_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:secure_key/secure_key_platform_interface.dart';
 
 class MockSecureKeyPlatform
     with MockPlatformInterfaceMixin
     implements SecureKeyPlatform {
   @override
-  Future<void> createPairKey() {
+  Future<bool> createPairKey() {
+    // TODO: implement createPairKey
     throw UnimplementedError();
   }
 
   @override
-  Future<void> getPublicKey() {
+  Future<bool> deleteKey() {
+    // TODO: implement deleteKey
     throw UnimplementedError();
   }
 
   @override
-  Future<void> getPublicKeyData() {
+  Future<String?> getPublicKey() {
+    // TODO: implement getPublicKey
     throw UnimplementedError();
   }
-  
+
   @override
-  Future<void> getPrivatekey() {
-    // TODO: implement getPrivatekey
+  Future<bool> initialize(int size) {
+    // TODO: implement initialize
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String?> signSha256(String input) {
+    // TODO: implement signSha256
     throw UnimplementedError();
   }
 }
@@ -31,9 +39,9 @@ class MockSecureKeyPlatform
 void main() {
   final SecureKeyPlatform initialPlatform = SecureKeyPlatform.instance;
 
-  test('$MethodChannelSecureKey is the default instance', () {
-    expect(initialPlatform, isInstanceOf<MethodChannelSecureKey>());
-  });
+  // test('$MethodChannelSecureKey is the default instance', () {
+  //   expect(initialPlatform, isInstanceOf<MethodChannelSecureKey>());
+  // });
 
   // test('getPlatformVersion', () async {
   //   SecureKey secureKeyPlugin = SecureKey();

@@ -1,3 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="kg.storekey.secure_key">
+
+    <uses-permission
+        android:name="android.permission.GET_ACCOUNTS"/>
 </manifest>
