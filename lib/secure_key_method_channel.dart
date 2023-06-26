@@ -37,4 +37,15 @@ class MethodChannelSecureKey extends SecureKeyPlatform {
     return await methodChannel
         .invokeMethod<String>('signSha256', {'inputSha256': input});
   }
+
+  @override
+  Future<Uint8List?> signSha256Bytes(String input) async {
+    return await methodChannel
+        .invokeMethod<Uint8List>('signSha256Bytes', {'inputSha256': input});
+  }
+
+  @override
+  Future<Uint8List?> getPublicKeyBytes() async {
+    return await methodChannel.invokeMethod<Uint8List>('getPublicKeyBytes');
+  }
 }

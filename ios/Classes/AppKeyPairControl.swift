@@ -20,24 +20,17 @@ class AppKeyPair{
     
     //------------Private-Get-Private-key--------------
     private func getPrivatekey() throws ->SecKey{
-        print("-----GET PRIVATE------")
-        print("-----1------")
         let appBundle: String =  Bundle.main.bundleIdentifier!
         let tag = appBundle.data(using: .utf8)!
-        print("-----2------")
         let getquery: [String: Any] = [kSecClass as String: kSecClassKey,
                                        kSecAttrApplicationTag as String: tag,
                                        kSecAttrKeyType as String: kSecAttrKeyTypeRSA,
                                        kSecReturnRef as String: true]
-        print("-----3------")
         var item: CFTypeRef?
         let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-        print("-----4------")
-        print(status)
         guard status == errSecSuccess else { throw KeyPairError.PRIVATE_KEY_NOT_FOUND }
         let key = item as! SecKey
-        print("-----5------")
-    
+       
         return key;
     }
     
@@ -46,98 +39,85 @@ class AppKeyPair{
     func getPublicKey() throws -> String?{
         let appBundle: String =  Bundle.main.bundleIdentifier!
         let tag = appBundle.data(using: .utf8)!
+     
         
-        let getquery: [String: Any] = [
-                kSecClass as String: kSecClassKey,
-                kSecAttrKeyType as String: kSecAttrKeyTypeRSA,
-                kSecAttrApplicationTag as String: tag,
-                kSecReturnData as String: true,
-                kSecAttrKeyClass as String: kSecAttrKeyClassPublic
-            ]
+        let privateKey:SecKey? = try getPrivatekey();
+        let publicKey = SecKeyCopyPublicKey(privateKey!)
         
-        var item: CFTypeRef?
-        let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-        guard status == errSecSuccess else {
+        guard publicKey != nil else{
             throw KeyPairError.NOT_FOUND
-           }
-        if let keyData = item as? Data {
-                return keyData.base64EncodedString()
-            } else {
-                throw KeyPairError.NOT_FOUND
-            }
+        }
         
-//        let privateKey:SecKey? = try getPrivatekey();
-//        print("-----101------")
-//        let publicKey = SecKeyCopyPublicKey(privateKey!)!
-//        print("-----102------")
-//        var error: Unmanaged<CFError>?
-//
-//        guard let cfData = SecKeyCopyExternalRepresentation(publicKey, &error) as CFData? else {
-//            throw KeyPairError.UNKNOWN
-//        }
-//        print("-----103------")
-//        print(cfData)
-//        let data = cfData as Data
-//        print("-----104------")
-//        print(data)
-//        print(String(decoding: data, as: UTF8.self))
-//        return String(decoding: data, as: UTF8.self)
+        var error: Unmanaged<CFError>?
+
+        guard let publicKeyExternalRep = SecKeyCopyExternalRepresentation(publicKey!, &error) as CFData? else {
+            throw KeyPairError.UNKNOWN
+        }
+        
+        
+        let data = publicKeyExternalRep as Data
+        
+        let strPublicKeyPKCS1 = appendPrefixSuffixTo(data.base64EncodedString(options: .lineLength64Characters), prefix: "-----BEGIN RSA PUBLIC KEY-----\r\n", suffix: "\r\n-----END RSA PUBLIC KEY-----")
+
+        let pemPrefixBuffer :[UInt8] = [
+                  0x30, 0x82, 0x01, 0x22, 0x30, 0x0d, 0x06, 0x09,
+                  0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01,
+                  0x01, 0x05, 0x00, 0x03, 0x82, 0x01, 0x0f, 0x00
+        ]
+        
+        var finalPemData = Data(bytes: pemPrefixBuffer as [UInt8], count: pemPrefixBuffer.count)
+        finalPemData.append(data)
+        
+        let strPublicKeyPEM = appendPrefixSuffixTo(finalPemData.base64EncodedString(options: .lineLength64Characters), prefix: "-----BEGIN PUBLIC KEY-----\r\n", suffix: "\r\n-----END PUBLIC KEY-----")
+        
+        return strPublicKeyPEM
+    }
+    
+    func getPublicKeyBytes() throws -> FlutterStandardTypedData{
+        let appBundle: String =  Bundle.main.bundleIdentifier!
+        let tag = appBundle.data(using: .utf8)!
+      
+        let privateKey:SecKey? = try getPrivatekey();
+        let publicKey = SecKeyCopyPublicKey(privateKey!)
+        
+        guard publicKey != nil else{
+            throw KeyPairError.NOT_FOUND
+        }
+        
+        var error: Unmanaged<CFError>?
+
+        guard let cfData = SecKeyCopyExternalRepresentation(publicKey!, &error) as CFData? else {
+            throw KeyPairError.UNKNOWN
+        }
+        return byteArray(from:cfData);
     }
 
+
+   
     //------------Create-Rsa-Key-Pair--------------
     func createRsaKeyPair() throws -> Bool {
         let appBundle: String =  Bundle.main.bundleIdentifier!
         let tag:String = appBundle
-        print("-----1------")
+     
+       
         let attributes: NSDictionary = [
             kSecAttrKeyType: kSecAttrKeyTypeRSA,
             kSecAttrKeySizeInBits: size,
-            kSecPublicKeyAttrs:[
-                kSecAttrIsPermanent: true,
-                kSecAttrApplicationTag: tag.data(using: .utf8)!, //(tag+".public").data(using: .utf8)!,
-            ],
             kSecPrivateKeyAttrs: [
                 kSecAttrIsPermanent: true,
                 kSecAttrApplicationTag: tag.data(using: .utf8)!,//(tag+".private").data(using: .utf8)!,
             ]
         ]
-        print("-----2------")
         
         do{
             var error: Unmanaged<CFError>?
             guard let key = SecKeyCreateRandomKey(attributes as CFDictionary, &error) else {
-                print("-----12------")
                 throw KeyPairError.CREATE_FAIL
             }
-            print("-----3------")
-            
-//            let addquery: [String: Any] = [kSecClass as String: kSecClassKey,
-//                                           kSecAttrApplicationTag as String: tag,
-//                                           kSecValueRef as String: key]
-//            print("-----4------")
-//            let status = SecItemAdd(addquery as CFDictionary, nil)
-//            guard status == errSecSuccess else {
-//                print("-----13------")
-//                print(status)
-//                throw KeyPairError.CREATE_FAIL
-//            }
-//            print("-----5------")
-//
-//            print("PrivateKeyRef")
-//            print(key)
-//            print("-----6------")
-//            guard let data = SecKeyCopyExternalRepresentation(key, &error) as CFData? else {
-//                print("-----14------")
-//                throw KeyPairError.CREATE_FAIL
-//            }
-//            print("-----7------")
-//            print("Real Private Key")
-//            print(data)
-            
+      
             
             return true
         }catch {
-            print("-----11------")
             throw KeyPairError.CREATE_FAIL
         }
     }
@@ -146,15 +126,11 @@ class AppKeyPair{
     func deleteKey()throws->Bool{
         let appBundle: String =  Bundle.main.bundleIdentifier!
         let tag:Data = appBundle.data(using: .utf8)!
-        print("-------1--------")
         let query: [String: Any] = [
                kSecClass as String: kSecClassKey,
                kSecAttrApplicationTag as String: tag
         ]
-        print("-------2-------")
         let status = SecItemDelete(query as CFDictionary)
-        print("-------3--------")
-        print(status)
         if status == errSecSuccess  {
             return true
         }
@@ -165,59 +141,56 @@ class AppKeyPair{
         throw KeyPairError.REMOVE_FAIL
     }
     
+   
+    
     //--------------Sign-Sha-256---------------
     func signSha256(input:String)throws->String?{
-        print("-------1--------")
-        print(input)
-        let inputSha256 = input.sha256()
-        print("-------2--------")
-        print(inputSha256)
-        let cfData = inputSha256.data(using: .utf8)! as CFData
-        print("-------3--------")
-        print(cfData)
-        let privateKey = try getPrivatekey()
-        print("-------4--------")
-        let algorithm: SecKeyAlgorithm = .rsaSignatureMessagePSSSHA256
-        print("-------5--------")
+        let cfData = input.data(using: .utf8)! as CFData
+         let privateKey = try getPrivatekey()
+        let algorithm: SecKeyAlgorithm = .rsaSignatureMessagePKCS1v15SHA256
         var error: Unmanaged<CFError>?
-        print("-------6--------")
-        guard SecKeyIsAlgorithmSupported(privateKey, .sign, algorithm) else {
-            print("-------7ee--------")
+        guard SecKeyIsAlgorithmSupported(privateKey, .sign, algorithm)else {
             throw KeyPairError.SIGNATURE_FAIL
-       }
-        print("-------7--------")
-
+        }
+      
        guard let signature = SecKeyCreateSignature(privateKey,
                                                    algorithm,
                                                    cfData as CFData,
                                                    &error) as Data? else {
-           print("-------8e--------")
            throw KeyPairError.SIGNATURE_FAIL
        }
-        print("-------8--------")
         return signature.base64EncodedString()
-        
-//        return String(decoding: signature, as: UTF8.self)
     }
     
-//    private func getPrivateKey() throws -> SecKey?{
-//        let appBundle: String =  Bundle.main.bundleIdentifier!
-//        let tag:String = appBundle
-//
-//        let query: [String: Any] = [
-//              kSecClass as String: kSecClassKey,
-//              kSecAttrApplicationTag as String: tag.data(using: .utf8)!,
-//              kSecReturnRef as String: true
-//        ]
-//
-//        var item: CFTypeRef?
-//        let status = SecItemCopyMatching(query as CFDictionary, &item)
-//        guard status == errSecSuccess else {
-//            print("Key retrieval error: \(status)")
-//            return nil
-//        }
-//        return (item as! SecKey)
-//    }
+    func signSha256Bytes(input:String)throws->FlutterStandardTypedData{
+        let inputSha256 = input.sha256()
+        let cfData = inputSha256.data(using: .utf8)! as CFData
+        let privateKey = try getPrivatekey()
+        let algorithm: SecKeyAlgorithm = .rsaSignatureMessagePKCS1v15SHA256
+        var error: Unmanaged<CFError>?
+        guard SecKeyIsAlgorithmSupported(privateKey, .sign, algorithm)else {
+            throw KeyPairError.SIGNATURE_FAIL
+        }
+        guard let signature = SecKeyCreateSignature(privateKey,
+                                                   algorithm,
+                                                   cfData as CFData,
+                                                   &error) as Data? else {
+        throw KeyPairError.SIGNATURE_FAIL
+       }
+        return FlutterStandardTypedData(bytes: signature)
+    }
+    
+    func byteArray(from cfData: CFData) -> FlutterStandardTypedData {
+        let length = CFDataGetLength(cfData)
+        var byteArray = [UInt8](repeating: 0, count: length)
+        CFDataGetBytes(cfData, CFRangeMake(0, length), &byteArray)
+        let data = Data(byteArray)
+        return FlutterStandardTypedData(bytes: data)
+    }
+    
+    func appendPrefixSuffixTo(_ string: String, prefix: String, suffix: String) -> String {
+        return "\(prefix)\(string)\(suffix)"
+    }
 }
 
 

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'secure_key_method_channel.dart';
@@ -31,6 +33,10 @@ abstract class SecureKeyPlatform extends PlatformInterface {
     throw UnimplementedError('getPublicKey() has not been implemented.');
   }
 
+  Future<Uint8List?> getPublicKeyBytes() {
+    throw UnimplementedError('getPublicKeybytes() has not been implemented.');
+  }
+
   Future<bool> createPairKey() {
     throw UnimplementedError('createPairKey() has not been implemented.');
   }
@@ -41,5 +47,9 @@ abstract class SecureKeyPlatform extends PlatformInterface {
 
   Future<String?> signSha256(String input) {
     throw UnimplementedError('signSha256() has not been implemented.');
+  }
+
+  Future<Uint8List?> signSha256Bytes(String input) {
+    throw UnimplementedError('signSha256Bytes() has not been implemented.');
   }
 }

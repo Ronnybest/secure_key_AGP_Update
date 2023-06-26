@@ -38,7 +38,7 @@ class _MyAppState extends State<MyApp> {
             OutlinedButton(
                 onPressed: () async {
                   try {
-                    var result = await _secureKeyPlugin.initialize();
+                    var result = await _secureKeyPlugin.initialize(size: 2048);
                     print('INIT:$result');
                   } catch (e) {
                     print('INIT:\n $e');
@@ -71,7 +71,8 @@ class _MyAppState extends State<MyApp> {
             OutlinedButton(
                 onPressed: () async {
                   try {
-                    var result = await _secureKeyPlugin.getPublicKey();
+                    var result =
+                        await _secureKeyPlugin.getPublicKey(bytes: true);
                     print('GET:$result');
                   } catch (e) {
                     print('GET:\n$e');
@@ -82,7 +83,8 @@ class _MyAppState extends State<MyApp> {
             OutlinedButton(
                 onPressed: () async {
                   try {
-                    var result = await _secureKeyPlugin.signSha256('1234');
+                    var result =
+                        await _secureKeyPlugin.signSha256('1234', bytes: true);
                     print('SIGN:$result');
                   } catch (e) {
                     print('SIGN:\n$e');

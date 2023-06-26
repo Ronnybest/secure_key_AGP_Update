@@ -40,6 +40,14 @@ public class AppKeyPair {
         return null;
     }
 
+    public byte[] getPublicKeyBytes(){
+        PublicKey publicKey = getPublicKeyFromKeystore(alias);
+        if (publicKey != null) {
+            return publicKey.getEncoded();
+        }
+        return null;
+    }
+
     public void createKeyPair(){
         try{
             KeyPairGenerator kpg = KeyPairGenerator.getInstance(
@@ -64,40 +72,42 @@ public class AppKeyPair {
     public String signSha256(String input){
         String signedString;
         try {
-            System.out.println("-----1-----");
             PrivateKey privateKey = getPrivateKeyFromKeystore(alias);
-            System.out.println("-----2-----");
-            System.out.println(privateKey.getAlgorithm());
-            System.out.println(privateKey.getFormat());
-            System.out.println(privateKey.isDestroyed());
-            System.out.println(privateKey.getEncoded());
             if(privateKey == null){
-                System.out.println("-----11-----");
                 throw new RuntimeException(AppKeyPairErrors.PRIVATE_KEY_NOT_FOUND.toString());
             }
-            System.out.println(privateKey);
-            System.out.println(privateKey==null);
-            System.out.println("-----3-----");
             Signature signature = Signature.getInstance(SHA256_WITH_RSA);
-            System.out.println("-----4-----");
             signature.initSign(privateKey);
-            System.out.println("-----5-----");
             byte[] inputBytes = input.getBytes(StandardCharsets.UTF_8);
-            System.out.println("-----6-----");
             signature.update(inputBytes);
-            System.out.println("-----7-----");
             byte[] signatureBytes = signature.sign();
-            System.out.println("-----8-----");
             signedString = Base64.encodeToString(signatureBytes,Base64.DEFAULT);
-            System.out.println("-----9-----");
-        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
-            System.out.println("---error-1"+e.getStackTrace()+"----"+e+"---");
+          } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             throw new RuntimeException(e);
         }catch (RuntimeException e){
-            System.out.println("---error-2"+e.getStackTrace()+"----");
             throw new RuntimeException(AppKeyPairErrors.PRIVATE_KEY_NOT_FOUND.toString());
         }
         return signedString;
+    }
+
+    public byte[] signSha256Bytes(String input){
+        byte[] signatureBytes;
+        try {
+            PrivateKey privateKey = getPrivateKeyFromKeystore(alias);
+            if(privateKey == null){
+                throw new RuntimeException(AppKeyPairErrors.PRIVATE_KEY_NOT_FOUND.toString());
+            }
+            Signature signature = Signature.getInstance(SHA256_WITH_RSA);
+            signature.initSign(privateKey);
+            byte[] inputBytes = input.getBytes(StandardCharsets.UTF_8);
+            signature.update(inputBytes);
+            signatureBytes = signature.sign();
+           } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            throw new RuntimeException(e);
+        }catch (RuntimeException e){
+            throw new RuntimeException(AppKeyPairErrors.PRIVATE_KEY_NOT_FOUND.toString());
+        }
+        return signatureBytes;
     }
 
 
@@ -113,7 +123,6 @@ public class AppKeyPair {
             ks.deleteEntry(alias);
             return true;
         }catch (CertificateException|KeyStoreException|IOException|NoSuchAlgorithmException|UnrecoverableEntryException e) {
-            System.out.println("DELETE KEY FAIL");
             throw new RuntimeException(e);
         }
     }
@@ -140,7 +149,6 @@ public class AppKeyPair {
         try {
             KeyStore keyStore = KeyStore.getInstance(PAIR_KEY_PROVIDER);
             keyStore.load(null);
-            System.out.println(keyStore.isKeyEntry(alias));
             privateKey = (PrivateKey) keyStore.getKey(alias, null);
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | UnrecoverableEntryException e) {
             throw new RuntimeException(e);

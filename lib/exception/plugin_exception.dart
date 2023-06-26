@@ -19,4 +19,5 @@ class SecureKeyErrors {
   static const String privateKeyNotFound = 'PRIVATE_KEY_NOT_FOUND';
   static const String signatureFail = 'SIGNATURE_FAIL';
   static const String unknown = 'UNKNOWN';
+  static const String init = 'INIT';
 }
