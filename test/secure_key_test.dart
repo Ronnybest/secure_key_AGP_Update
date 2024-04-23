@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:secure_key/secure_key_platform_interface.dart';
@@ -32,6 +34,18 @@ class MockSecureKeyPlatform
   @override
   Future<String?> signSha256(String input) {
     // TODO: implement signSha256
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Uint8List?> getPublicKeyBytes() {
+    // TODO: implement getPublicKeyBytes
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Uint8List?> signSha256Bytes(String input) {
+    // TODO: implement signSha256Bytes
     throw UnimplementedError();
   }
 }

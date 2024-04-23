@@ -5,24 +5,20 @@ import 'package:secure_key/exception/plugin_exception.dart';
 import 'package:secure_key/secure_key_platform_interface.dart';
 
 class SecureKey {
-  late bool _isInitialize;
+  SecureKey._();
 
-  SecureKey() {
-    _isInitialize = false;
-  }
+  static final SecureKey _instance = SecureKey._();
 
-  get isInitialize => _isInitialize;
+  static SecureKey get instance => _instance;
 
-  Future<bool> initialize({int size = 2048}) async {
-    _isInitialize = false;
+  Future<void> initialize({int size = 2048}) async {
     try {
-      _isInitialize = await SecureKeyPlatform.instance.initialize(size);
+      await SecureKeyPlatform.instance.initialize(size);
     } catch (e) {
       if (e is PlatformException) {
         throw SecureKeyException(e.code, e.message ?? '');
       }
     }
-    return _isInitialize;
   }
 
   Future<String?> getPublicKey({bytes = false}) async {
