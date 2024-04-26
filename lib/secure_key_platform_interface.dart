@@ -45,6 +45,14 @@ abstract class SecureKeyPlatform extends PlatformInterface {
     throw UnimplementedError('deleteKey() has not been implemented.');
   }
 
+  Future<String?> decryptWithRsa(String input) {
+    throw UnimplementedError('decryptWithRsa() has not been implemented.');
+  }
+
+  Future<String?> encryptWithRsa(String input) {
+    throw UnimplementedError('encryptWithRsa() has not been implemented.');
+  }
+
   Future<String?> signSha256(String input) {
     throw UnimplementedError('signSha256() has not been implemented.');
   }

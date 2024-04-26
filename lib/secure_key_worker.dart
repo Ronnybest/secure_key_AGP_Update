@@ -62,6 +62,29 @@ class SecureKey {
     return false;
   }
 
+  Future<String?> encryptWithRsa(String input) async {
+    try {
+      return await SecureKeyPlatform.instance.encryptWithRsa(input);
+    } catch (e) {
+      if (e is PlatformException) {
+        throw SecureKeyException(e.code, e.message ?? '');
+      }
+    }
+    return null;
+  }
+
+  Future<String?> decryptWithRsa(String input) async {
+    try {
+      print('TRY TO DECRYPT $input');
+      return await SecureKeyPlatform.instance.decryptWithRsa(input);
+    } catch (e) {
+      if (e is PlatformException) {
+        throw SecureKeyException(e.code, e.message ?? '');
+      }
+    }
+    return null;
+  }
+
   Future<String?> signSha256(String input, {bytes = false}) async {
     try {
       if (bytes) {

@@ -48,11 +48,21 @@ class MockSecureKeyPlatform
     // TODO: implement signSha256Bytes
     throw UnimplementedError();
   }
+
+  @override
+  Future<String> decryptWithRsa(String input) {
+    // TODO: implement decryptWithRsa
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String> encryptWithRsa(String input) {
+    // TODO: implement encryptWithRsa
+    throw UnimplementedError();
+  }
 }
 
 void main() {
-  final SecureKeyPlatform initialPlatform = SecureKeyPlatform.instance;
-
   // test('$MethodChannelSecureKey is the default instance', () {
   //   expect(initialPlatform, isInstanceOf<MethodChannelSecureKey>());
   // });

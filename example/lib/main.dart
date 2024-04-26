@@ -13,11 +13,13 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final _secureKeyPlugin = SecureKey();
+  final _secureKeyPlugin = SecureKey.instance;
 
   int? level;
 
   List<String> llll = [];
+
+  String? encryptedValue;
 
   @override
   void initState() {
@@ -31,33 +33,36 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            OutlinedButton(
+        body: SizedBox(
+          width: MediaQuery.sizeOf(context).width,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              OutlinedButton(
                 onPressed: () async {
                   try {
-                    var result = await _secureKeyPlugin.initialize(size: 2048);
-                    print('INIT:$result');
+                    await _secureKeyPlugin.initialize(size: 2048);
+                    print('INIT');
                   } catch (e) {
                     print('INIT:\n $e');
                   }
                 },
-                child: const Text('INIT')),
-            const SizedBox(height: 16),
-            OutlinedButton(
-                onPressed: () async {
-                  try {
-                    var result = await _secureKeyPlugin.createPairKey();
-                    print('Create:$result');
-                  } catch (e) {
-                    print('Create:\n$e');
-                  }
-                },
-                child: const Text('Create')),
-            const SizedBox(height: 16),
-            OutlinedButton(
+                child: const Text('INIT'),
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton(
+                  onPressed: () async {
+                    try {
+                      var result = await _secureKeyPlugin.createPairKey();
+                      print('Create:$result');
+                    } catch (e) {
+                      print('Create:\n$e');
+                    }
+                  },
+                  child: const Text('Create')),
+              const SizedBox(height: 16),
+              OutlinedButton(
                 onPressed: () async {
                   try {
                     var result = await _secureKeyPlugin.deleteKey();
@@ -66,9 +71,10 @@ class _MyAppState extends State<MyApp> {
                     print('DELETE:\n$e');
                   }
                 },
-                child: const Text('DELETE')),
-            const SizedBox(height: 16),
-            OutlinedButton(
+                child: const Text('DELETE'),
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton(
                 onPressed: () async {
                   try {
                     var result =
@@ -78,9 +84,10 @@ class _MyAppState extends State<MyApp> {
                     print('GET:\n$e');
                   }
                 },
-                child: const Text('Get key')),
-            const SizedBox(height: 16),
-            OutlinedButton(
+                child: const Text('Get key'),
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton(
                 onPressed: () async {
                   try {
                     var result =
@@ -90,8 +97,36 @@ class _MyAppState extends State<MyApp> {
                     print('SIGN:\n$e');
                   }
                 },
-                child: const Text('Sign sha 256')),
-          ],
+                child: const Text('Sign sha 256'),
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton(
+                onPressed: () async {
+                  try {
+                    encryptedValue =
+                        await _secureKeyPlugin.encryptWithRsa('Bearer ');
+                    print('ENCRYPT: $encryptedValue');
+                    setState(() {});
+                  } catch (e) {
+                    print('ENCRYPT:\n $e');
+                  }
+                },
+                child: const Text('ENCRYPT WITH RSA'),
+              ),
+              OutlinedButton(
+                onPressed: () async {
+                  try {
+                    var res = await _secureKeyPlugin
+                        .decryptWithRsa(encryptedValue ?? '');
+                    print('DECRYPT: $res');
+                  } catch (e) {
+                    print('DECRYPT:\n $e');
+                  }
+                },
+                child: const Text('DECRYPT WITH RSA'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -33,6 +33,18 @@ class MethodChannelSecureKey extends SecureKeyPlatform {
   }
 
   @override
+  Future<String?> encryptWithRsa(String input) async {
+    return await methodChannel
+        .invokeMethod<String>('encryptWithRsa', {'encryptInput': input});
+  }
+
+  @override
+  Future<String?> decryptWithRsa(String input) async {
+    return await methodChannel
+        .invokeMethod('decryptWithRsa', {'decryptInput': input});
+  }
+
+  @override
   Future<String?> signSha256(String input) async {
     return await methodChannel
         .invokeMethod<String>('signSha256', {'inputSha256': input});

@@ -21,6 +21,11 @@ import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
 public class AppKeyPair {
     private static final String PAIR_KEY_PROVIDER = "AndroidKeyStore";
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
@@ -56,19 +61,55 @@ public class AppKeyPair {
             kpg.initialize(
                     new KeyGenParameterSpec.Builder(
                             alias,
-                            KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
+                            KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY | KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
                             .setKeySize(size)
                             .setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
                             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
                             .setDigests(KeyProperties.DIGEST_SHA256)
+                            .setRandomizedEncryptionRequired(true)
                             .build(),
-                    secureRandom);
+                    secureRandom
+                    );
             kpg.generateKeyPair();
         } catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchProviderException e) {
             throw new RuntimeException(e);
         }
     }
+    public String encryptWithRsa(String args)
+            throws NoSuchAlgorithmException,
+            NoSuchPaddingException,
+            InvalidKeyException,
+            IllegalBlockSizeException,
+            BadPaddingException {
 
+        PublicKey publicKey = getPublicKeyFromKeystore(alias);
+        if(publicKey == null){
+            throw new RuntimeException(AppKeyPairErrors.PUBLIC_KEY_NOT_FOUND.toString());
+        }
+        Cipher cipher1 = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher1.init(Cipher.ENCRYPT_MODE, publicKey);
+        byte[] encryptedBytes = cipher1.doFinal(args.getBytes(StandardCharsets.UTF_8));
+        return Base64.encodeToString(encryptedBytes, Base64.DEFAULT);
+    }
+    public String decryptWithRsa(String input)
+            throws NoSuchAlgorithmException,
+            NoSuchPaddingException,
+            InvalidKeyException,
+            IllegalBlockSizeException,
+            BadPaddingException {
+
+        PrivateKey privateKey = getPrivateKeyFromKeystore(alias);
+        if(privateKey == null){
+            throw new RuntimeException(AppKeyPairErrors.PRIVATE_KEY_NOT_FOUND.toString());
+        }
+        if(input == null) {
+            throw new RuntimeException(AppKeyPairErrors.DECODE_INPUT_NULL.toString());
+        }
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+        byte[] decryptedBytes = cipher.doFinal(Base64.decode(input, Base64.DEFAULT));
+        return new String(decryptedBytes);
+    }
     public String signSha256(String input){
         String signedString;
         try {

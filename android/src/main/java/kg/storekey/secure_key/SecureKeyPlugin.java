@@ -3,6 +3,13 @@ package kg.storekey.secure_key;
 import android.content.Context;
 import androidx.annotation.NonNull;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -48,6 +55,12 @@ public class SecureKeyPlugin implements FlutterPlugin, MethodChannel.MethodCallH
         break;
       case "signSha256Bytes":
         signSha256Bytes(call,result);
+        break;
+      case "encryptWithRsa":
+        encryptWithRsa(call, result);
+        break;
+      case "decryptWithRsa":
+        decryptWithRsa(call, result);
         break;
       default:
         result.notImplemented();
@@ -102,7 +115,50 @@ public class SecureKeyPlugin implements FlutterPlugin, MethodChannel.MethodCallH
     result.success(key);
   }
 
+  private void encryptWithRsa(MethodCall call, Result result) {
+    if(controller == null) {
+      result.error(AppKeyPairErrors.NOT_INIT.toString(), "Controller not init", null);
+      return;
+    }
+    String input = call.argument("encryptInput");
+    if(input != null) {
+      try {
+        String encryptedData = controller.encryptWithRsa(input);
+        if(encryptedData != null) {
+          result.success(encryptedData);
+        }else  {
+          result.error(AppKeyPairErrors.ENCRYPTION_FAIL.toString(),"DATA NOT ENCRYPTED!",null);
+        }
+      } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException |
+               BadPaddingException | InvalidKeyException e) {
+        result.error(AppKeyPairErrors.ENCRYPTION_FAIL.toString(),"DATA NOT ENCRYPTED " + e.toString(),null);
+      }
+    }
+  }
 
+  private void decryptWithRsa(MethodCall call, Result result) {
+    if(controller == null){
+      result.error(AppKeyPairErrors.NOT_INIT.toString(), "Controller not init", null);
+      return;
+    }
+    String input = call.argument("decryptInput");
+    if(input != null) {
+      try {
+       String decryptedData =  controller.decryptWithRsa(input);
+       if(decryptedData != null) {
+         result.success(decryptedData);
+       }else {
+         result.error(AppKeyPairErrors.DECRYPTION_FAIL.toString(),"DATA NOT DECRYPTED!",null);
+       }
+      }catch (NoSuchAlgorithmException|
+      NoSuchPaddingException|
+              InvalidKeyException|
+              IllegalBlockSizeException|
+              BadPaddingException e) {
+        result.error(AppKeyPairErrors.DECRYPTION_FAIL.toString(),"DATA NOT DECRYPTED " + e.toString(),null);
+      }
+    }
+  }
   private void signSha256(MethodCall call,Result result){
     if(controller == null){
       result.error(AppKeyPairErrors.NOT_INIT.toString(), "Controller not init", null);
