@@ -4,6 +4,9 @@ import android.content.Context;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
+import java.util.ArrayList;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -20,6 +23,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -80,15 +84,29 @@ public class AppKeyPair {
             NoSuchPaddingException,
             InvalidKeyException,
             IllegalBlockSizeException,
-            BadPaddingException {
+            BadPaddingException, NoSuchProviderException {
 
         PublicKey publicKey = getPublicKeyFromKeystore(alias);
         if(publicKey == null){
             throw new RuntimeException(AppKeyPairErrors.PUBLIC_KEY_NOT_FOUND.toString());
         }
-        Cipher cipher1 = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        cipher1.init(Cipher.ENCRYPT_MODE, publicKey);
-        byte[] encryptedBytes = cipher1.doFinal(args.getBytes(StandardCharsets.UTF_8));
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        byte[] inputBytes = args.getBytes(StandardCharsets.UTF_8);
+        // Размер блока входных данных для RSA шифрования (в зависимости от размера ключа)
+        int inputBlockSize = cipher.getBlockSize();
+        // Шифрование блоков данных
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        int offset = 0;
+        while (offset < inputBytes.length) {
+            int length = Math.min(inputBytes.length - offset, inputBlockSize);
+            byte[] chunk = cipher.doFinal(inputBytes, offset, length);
+            outputStream.write(chunk, 0, chunk.length);
+            offset += length;
+        }
+
+        byte[] encryptedBytes = outputStream.toByteArray();
+
         return Base64.encodeToString(encryptedBytes, Base64.DEFAULT);
     }
     public String decryptWithRsa(String input)
@@ -96,7 +114,7 @@ public class AppKeyPair {
             NoSuchPaddingException,
             InvalidKeyException,
             IllegalBlockSizeException,
-            BadPaddingException {
+            BadPaddingException, NoSuchProviderException {
 
         PrivateKey privateKey = getPrivateKeyFromKeystore(alias);
         if(privateKey == null){
@@ -105,10 +123,38 @@ public class AppKeyPair {
         if(input == null) {
             throw new RuntimeException(AppKeyPairErrors.DECODE_INPUT_NULL.toString());
         }
-        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        Cipher  cipher;
+        cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
-        byte[] decryptedBytes = cipher.doFinal(Base64.decode(input, Base64.DEFAULT));
-        return new String(decryptedBytes);
+
+        byte[] encryptedBytes = Base64.decode(input,Base64.DEFAULT);
+
+        // Размер блока входных данных для RSA дешифрования (в зависимости от размера ключа)
+        int inputBlockSize = 256;
+
+        // Дешифрование блоков данных
+        ArrayList<byte[]> decryptedBlocks = new ArrayList<>();
+        for (int i = 0; i < encryptedBytes.length; i += inputBlockSize) {
+            int blockEnd = Math.min(i + inputBlockSize, encryptedBytes.length);
+            byte[] encryptedBlock = Arrays.copyOfRange(encryptedBytes, i, blockEnd);
+            byte[] decryptedBlock = cipher.doFinal(encryptedBlock);
+            decryptedBlocks.add(decryptedBlock);
+        }
+
+        // Объединение расшифрованных блоков в один массив
+        int totalLength = 0;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            totalLength = decryptedBlocks.stream().mapToInt(block -> block.length).sum();
+        }
+        byte[] decryptedData = new byte[totalLength];
+        int offset = 0;
+        for (byte[] block : decryptedBlocks) {
+            System.arraycopy(block, 0, decryptedData, offset, block.length);
+            offset += block.length;
+        }
+
+        // Преобразование массива байт в строку
+        return new String(decryptedData);
     }
     public String signSha256(String input){
         String signedString;

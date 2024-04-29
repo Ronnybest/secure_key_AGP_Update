@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -130,7 +131,7 @@ public class SecureKeyPlugin implements FlutterPlugin, MethodChannel.MethodCallH
           result.error(AppKeyPairErrors.ENCRYPTION_FAIL.toString(),"DATA NOT ENCRYPTED!",null);
         }
       } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException |
-               BadPaddingException | InvalidKeyException e) {
+               BadPaddingException | InvalidKeyException |NoSuchProviderException e) {
         result.error(AppKeyPairErrors.ENCRYPTION_FAIL.toString(),"DATA NOT ENCRYPTED " + e.toString(),null);
       }
     }
@@ -154,7 +155,8 @@ public class SecureKeyPlugin implements FlutterPlugin, MethodChannel.MethodCallH
       NoSuchPaddingException|
               InvalidKeyException|
               IllegalBlockSizeException|
-              BadPaddingException e) {
+              BadPaddingException        |NoSuchProviderException  e) {
+
         result.error(AppKeyPairErrors.DECRYPTION_FAIL.toString(),"DATA NOT DECRYPTED " + e.toString(),null);
       }
     }
