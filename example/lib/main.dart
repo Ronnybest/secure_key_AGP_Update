@@ -105,36 +105,36 @@ class _MyAppState extends State<MyApp> {
                 child: const Text('Sign sha 256'),
               ),
               const SizedBox(height: 16),
-              OutlinedButton(
-                onPressed: () async {
-                  try {
-                    var now = DateTime.now();
-                    encryptedValue =
-                        await _secureKeyPlugin.encryptWithRsa(token);
-                    print(
-                        'ENCRYPT  TIME: ${DateTime.now().difference(now).inMilliseconds}');
-                    setState(() {});
-                  } catch (e) {
-                    print('ENCRYPT:\n $e');
-                  }
-                },
-                child: const Text('ENCRYPT WITH RSA'),
-              ),
-              OutlinedButton(
-                onPressed: () async {
-                  try {
-                    var now = DateTime.now();
-                    var res = await _secureKeyPlugin
-                        .decryptWithRsa(encryptedValue ?? '');
+              // OutlinedButton(
+              //   onPressed: () async {
+              //     try {
+              //       var now = DateTime.now();
+              //       encryptedValue =
+              //           await _secureKeyPlugin._encryptWithRsa(token);
+              //       print(
+              //           'ENCRYPT  TIME: ${DateTime.now().difference(now).inMilliseconds}');
+              //       setState(() {});
+              //     } catch (e) {
+              //       print('ENCRYPT:\n $e');
+              //     }
+              //   },
+              //   child: const Text('ENCRYPT WITH RSA'),
+              // ),
+              // OutlinedButton(
+              //   onPressed: () async {
+              //     try {
+              //       var now = DateTime.now();
+              //       var res = await _secureKeyPlugin
+              //           .decryptWithRsa(encryptedValue ?? '');
 
-                    print(
-                        'DECRYPT: $res   TIME: ${DateTime.now().difference(now).inMilliseconds}');
-                  } catch (e) {
-                    print('DECRYPT:\n $e');
-                  }
-                },
-                child: const Text('DECRYPT WITH RSA'),
-              ),
+              //       print(
+              //           'DECRYPT: $res   TIME: ${DateTime.now().difference(now).inMilliseconds}');
+              //     } catch (e) {
+              //       print('DECRYPT:\n $e');
+              //     }
+              //   },
+              //   child: const Text('DECRYPT WITH RSA'),
+              // ),
               OutlinedButton(
                 onPressed: () async {
                   try {

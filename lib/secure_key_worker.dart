@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:secure_key/exception/plugin_exception.dart';
 import 'package:secure_key/secure_key_platform_interface.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SecureKey {
   SecureKey._();
@@ -10,10 +11,12 @@ class SecureKey {
   static final SecureKey _instance = SecureKey._();
 
   static SecureKey get instance => _instance;
+  late final SharedPreferences prefs;
 
   Future<void> initialize({int size = 2048}) async {
     try {
       await SecureKeyPlatform.instance.initialize(size);
+      prefs = await SharedPreferences.getInstance();
     } catch (e) {
       if (e is PlatformException) {
         throw SecureKeyException(e.code, e.message ?? '');
@@ -62,7 +65,7 @@ class SecureKey {
     return false;
   }
 
-  Future<String?> encryptWithRsa(String input) async {
+  Future<String?> _encryptWithRsa(String input) async {
     try {
       return await SecureKeyPlatform.instance.encryptWithRsa(input);
     } catch (e) {
@@ -73,7 +76,7 @@ class SecureKey {
     return null;
   }
 
-  Future<String?> decryptWithRsa(String input) async {
+  Future<String?> _decryptWithRsa(String input) async {
     try {
       return await SecureKeyPlatform.instance.decryptWithRsa(input);
     } catch (e) {
@@ -82,6 +85,16 @@ class SecureKey {
       }
     }
     return null;
+  }
+
+  void write({required String key, required String value}) async {
+    String? encryptedData = await _encryptWithRsa(value);
+    prefs.setString(key, encryptedData ?? '');
+  }
+
+  Future<String> read({required String key}) async {
+    String? res = prefs.getString(key);
+    return await _decryptWithRsa(res ?? '') ?? '';
   }
 
   Future<String?> signSha256(String input, {bytes = false}) async {
