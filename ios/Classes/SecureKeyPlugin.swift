@@ -27,7 +27,11 @@ public class SecureKeyPlugin: NSObject, FlutterPlugin {
           getPublicKeyBytes(result: result)
       }else if call.method == "signSha256Bytes"{
           signSha256Bytes(call: call, result: result)
-      }else{
+      }else if call.method == "encryptWithRsa"{
+          encryptWithRsa(call: call, result: result)
+      }else if call.method == "decryptWithRsa" {
+          decryptWithRsa(call: call, result: result)
+      } else{
           result(FlutterMethodNotImplemented)
       }
   }
@@ -144,6 +148,62 @@ public class SecureKeyPlugin: NSObject, FlutterPlugin {
             result(FlutterError(code: String(describing: KeyPairError.BAD_ARGS),message: "Input argument not found",details: nil))
         }
     }
+    
+    private func encryptWithRsa(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard controller != nil else {
+            result(FlutterError(code: String(describing: KeyPairError.NOT_INIT), message: "Plugin not init", details: nil))
+          return
+        }
+        if let args = call.arguments as? Dictionary<String, Any>,
+           let input = args["encryptInput"] as? String
+        {
+            do{
+                let encryptedData:String? = try controller!.encryptWithRsa(plainText: input)
+                result(encryptedData)
+            }catch KeyPairError.ALGORITM_NOT_SUPPORTED {
+                result(FlutterError(code: String(describing: KeyPairError.ALGORITM_NOT_SUPPORTED), message: "Algoritm support error", details: nil))
+            }catch KeyPairError.NOT_FOUND{
+                result(FlutterError(code: String(describing: KeyPairError.NOT_FOUND), message: "Public key not found", details: nil))
+            }catch KeyPairError.ENCRYPT_ERROR {
+                result(FlutterError(code: String(describing: KeyPairError.ENCRYPT_ERROR), message: "Encrypt failed", details: nil))
+            }catch KeyPairError.INPUT_NOT_FOUND {
+                result(FlutterError(code: String(describing: KeyPairError.INPUT_NOT_FOUND), message: "Encrypt failed, input nil", details: nil))
+            }catch {
+                result(FlutterError(code: String(describing: KeyPairError.ENCRYPT_ERROR), message: "Encryption failed, Error occurred: \(error)", details: nil))
+            }
+           
+        }else{
+            result(FlutterError(code: String(describing: KeyPairError.BAD_ARGS),message: "Input argument not found",details: nil))
+        }
+    }
+    
+    private func decryptWithRsa(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard controller != nil else {
+            result(FlutterError(code: String(describing: KeyPairError.NOT_INIT), message: "Plugin not init", details: nil))
+          return
+        }
+        if let args = call.arguments as? Dictionary<String, Any>,
+           let input = args["decryptInput"] as? String
+        {
+            do{
+                let decryptedData:String? = try controller!.decryptWithRsa(cipherData: input)
+                result(decryptedData)
+            }catch KeyPairError.ALGORITM_NOT_SUPPORTED {
+                result(FlutterError(code: String(describing: KeyPairError.ALGORITM_NOT_SUPPORTED), message: "Algoritm support error", details: nil))
+            }catch KeyPairError.NOT_FOUND{
+                result(FlutterError(code: String(describing: KeyPairError.NOT_FOUND), message: "Private key not found", details: nil))
+            }catch KeyPairError.DECRYPT_ERROR {
+                result(FlutterError(code: String(describing: KeyPairError.DECRYPT_ERROR), message: "Decrypt failed", details: nil))
+            }catch {
+                result(FlutterError(code: String(describing: KeyPairError.DECRYPT_ERROR), message: "Encryption failed, Error occurred: \(error)", details: nil))
+            }
+           
+        }else{
+            result(FlutterError(code: String(describing: KeyPairError.BAD_ARGS),message: "Input argument not found",details: nil))
+        }
+    }
+    
+    
     
     private func signSha256Bytes(call:FlutterMethodCall,result: @escaping FlutterResult){
         guard controller != nil else{

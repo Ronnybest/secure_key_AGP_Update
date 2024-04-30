@@ -75,7 +75,6 @@ class SecureKey {
 
   Future<String?> decryptWithRsa(String input) async {
     try {
-      print('TRY TO DECRYPT $input');
       return await SecureKeyPlatform.instance.decryptWithRsa(input);
     } catch (e) {
       if (e is PlatformException) {

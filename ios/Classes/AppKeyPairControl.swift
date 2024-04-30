@@ -141,6 +141,77 @@ class AppKeyPair{
         throw KeyPairError.REMOVE_FAIL
     }
     
+    func encryptWithRsa(plainText: String) throws -> String? {
+        guard let data = plainText.data(using: .utf8) else { throw KeyPairError.INPUT_NOT_FOUND  }
+
+        let algorithm: SecKeyAlgorithm = .rsaEncryptionOAEPSHA256
+        
+        let privateKey:SecKey? = try getPrivatekey()
+        let publicKey = SecKeyCopyPublicKey(privateKey!)
+        guard publicKey != nil else{
+            throw KeyPairError.NOT_FOUND
+        }
+
+        guard SecKeyIsAlgorithmSupported(publicKey!, .encrypt, algorithm) else { throw KeyPairError.ALGORITM_NOT_SUPPORTED }
+        let maxChunkSize = 190
+            
+        var encryptedChunks: [Data] = []
+            
+        var startIndex = 0
+        while startIndex < data.count {
+            let endIndex = min(startIndex + maxChunkSize, data.count)
+            let chunk = data[startIndex..<endIndex]
+            var error: Unmanaged<CFError>?
+            guard let encryptedData = SecKeyCreateEncryptedData(publicKey!,algorithm,chunk as CFData,&error) as Data? else {
+                if let error = error {
+                    print("Encryption error: \(error.takeRetainedValue())")
+                }
+                throw KeyPairError.ENCRYPT_ERROR
+            }
+            
+            encryptedChunks.append(encryptedData)
+            startIndex = endIndex
+        }
+
+        let encryptedData = Data(encryptedChunks.joined())
+        return encryptedData.base64EncodedString()
+    }
+    
+    func decryptWithRsa(cipherData: String) throws -> String? {
+        let algorithm: SecKeyAlgorithm = .rsaEncryptionOAEPSHA256
+        let privateKey = try getPrivatekey()
+
+        guard SecKeyIsAlgorithmSupported(privateKey, .decrypt, algorithm) else { throw KeyPairError.ALGORITM_NOT_SUPPORTED }
+        let maxChunkSize = SecKeyGetBlockSize(privateKey)
+        
+        guard let encryptedData = Data(base64Encoded: cipherData) else {
+            throw KeyPairError.BAD_ARGS
+        }
+        
+        var decryptedChunks: [Data] = []
+        
+        var startIndex = 0
+        while startIndex < encryptedData.count {
+            let endIndex = min(startIndex + maxChunkSize, encryptedData.count)
+            let chunk = encryptedData[startIndex..<endIndex]
+
+            var error: Unmanaged<CFError>?
+            guard let decryptedData = SecKeyCreateDecryptedData(privateKey,algorithm,chunk as CFData,&error) as Data? else {
+                if let error = error {
+                    print("Decryption error: \(error.takeRetainedValue())")
+                }
+                throw KeyPairError.DECRYPT_ERROR
+            }
+            
+            decryptedChunks.append(decryptedData)
+            startIndex = endIndex
+        }
+        
+        let decryptedData = Data(decryptedChunks.joined())
+        
+        return String(data: decryptedData, encoding: .utf8)
+    }
+    
    
     
     //--------------Sign-Sha-256---------------
@@ -206,4 +277,8 @@ enum KeyPairError: Error {
     case PRIVATE_KEY_NOT_FOUND
     case SIGNATURE_FAIL
     case UNKNOWN
+    case ALGORITM_NOT_SUPPORTED
+    case ENCRYPT_ERROR
+    case DECRYPT_ERROR
+    case INPUT_NOT_FOUND
 }
