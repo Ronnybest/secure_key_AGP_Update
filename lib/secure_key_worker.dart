@@ -87,7 +87,7 @@ class SecureKey {
     return null;
   }
 
-  void write({required String key, required String value}) async {
+  Future<void> write({required String key, required String value}) async {
     String? encryptedData = await _encryptWithRsa(value);
     prefs.setString(key, encryptedData ?? '');
   }
@@ -95,6 +95,14 @@ class SecureKey {
   Future<String> read({required String key}) async {
     String? res = prefs.getString(key);
     return await _decryptWithRsa(res ?? '') ?? '';
+  }
+
+  Future<void> clear(String key) async {
+    await prefs.remove(key);
+  }
+
+  Future<void> clearAll() async {
+    await prefs.clear();
   }
 
   Future<String?> signSha256(String input, {bytes = false}) async {
