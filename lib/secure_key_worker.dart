@@ -92,7 +92,7 @@ class SecureKey {
     prefs.setString(key, encryptedData ?? '');
   }
 
-  Future<String> read({required String key}) async {
+  Future<String?> read({required String key}) async {
     String? res = prefs.getString(key);
     return await _decryptWithRsa(res ?? '') ?? '';
   }

@@ -136,20 +136,6 @@ class _MyAppState extends State<MyApp> {
               ),
               OutlinedButton(
                 onPressed: () async {
-                  try {
-                    var now = DateTime.now();
-                    var res = await _secureKeyPlugin.read(key: 'key');
-
-                    print(
-                        'DECRYPT: $res   TIME: ${DateTime.now().difference(now).inMilliseconds}');
-                  } catch (e) {
-                    print('DECRYPT:\n $e');
-                  }
-                },
-                child: const Text('DECRYPT WITH RSA'),
-              ),
-              OutlinedButton(
-                onPressed: () async {
                   await _secureKeyPlugin.clear('key');
                 },
                 child: const Text('CLEAR BY KEY'),
@@ -160,34 +146,34 @@ class _MyAppState extends State<MyApp> {
                 },
                 child: const Text('CLEAR ALL'),
               ),
-              OutlinedButton(
-                onPressed: () async {
-                  try {
-                    var now = DateTime.now();
-                    await storage.write(key: 'key', value: token);
+              // OutlinedButton(
+              //   onPressed: () async {
+              //     try {
+              //       var now = DateTime.now();
+              //       await storage.write(key: 'key', value: token);
 
-                    print(
-                        'SECURE STORAGE TIME: ${DateTime.now().difference(now).inMilliseconds}');
-                  } catch (e) {
-                    print('DECRYPT:\n $e');
-                  }
-                },
-                child: const Text('SAVE INTO SECURE STORAGE'),
-              ),
-              OutlinedButton(
-                onPressed: () async {
-                  try {
-                    var now = DateTime.now();
-                    String? res = await storage.read(key: 'key');
+              //       print(
+              //           'SECURE STORAGE TIME: ${DateTime.now().difference(now).inMilliseconds}');
+              //     } catch (e) {
+              //       print('DECRYPT:\n $e');
+              //     }
+              //   },
+              //   child: const Text('SAVE INTO SECURE STORAGE'),
+              // ),
+              // OutlinedButton(
+              //   onPressed: () async {
+              //     try {
+              //       var now = DateTime.now();
+              //       String? res = await storage.read(key: 'key');
 
-                    print(
-                        'SECURE STORAGE TIME READ: $res   TIME: ${DateTime.now().difference(now).inMilliseconds}');
-                  } catch (e) {
-                    print('DECRYPT:\n $e');
-                  }
-                },
-                child: const Text('READ FROM SECURE STORAGE'),
-              ),
+              //       print(
+              //           'SECURE STORAGE TIME READ: $res   TIME: ${DateTime.now().difference(now).inMilliseconds}');
+              //     } catch (e) {
+              //       print('DECRYPT:\n $e');
+              //     }
+              //   },
+              //   child: const Text('READ FROM SECURE STORAGE'),
+              // ),
             ],
           ),
         ),
