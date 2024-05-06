@@ -6,17 +6,23 @@ import 'package:secure_key/secure_key_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SecureKey {
-  SecureKey._();
+  late final SharedPreferences prefs;
+
+  SecureKey._() {
+    initPrefs();
+  }
 
   static final SecureKey _instance = SecureKey._();
 
   static SecureKey get instance => _instance;
-  late final SharedPreferences prefs;
+
+  void initPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+  }
 
   Future<void> initialize({int size = 2048}) async {
     try {
       await SecureKeyPlatform.instance.initialize(size);
-      prefs = await SharedPreferences.getInstance();
     } catch (e) {
       if (e is PlatformException) {
         throw SecureKeyException(e.code, e.message ?? '');
