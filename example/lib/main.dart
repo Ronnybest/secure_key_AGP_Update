@@ -138,6 +138,32 @@ class _MyAppState extends State<MyApp> {
                 onPressed: () async {
                   try {
                     var now = DateTime.now();
+                    var res = await _secureKeyPlugin.read(key: 'key');
+
+                    print(
+                        'DECRYPT: $res   TIME: ${DateTime.now().difference(now).inMilliseconds}');
+                  } catch (e) {
+                    print('DECRYPT:\n $e');
+                  }
+                },
+                child: const Text('DECRYPT WITH RSA'),
+              ),
+              OutlinedButton(
+                onPressed: () async {
+                  await _secureKeyPlugin.clear('key');
+                },
+                child: const Text('CLEAR BY KEY'),
+              ),
+              OutlinedButton(
+                onPressed: () async {
+                  await _secureKeyPlugin.clearAll();
+                },
+                child: const Text('CLEAR ALL'),
+              ),
+              OutlinedButton(
+                onPressed: () async {
+                  try {
+                    var now = DateTime.now();
                     await storage.write(key: 'key', value: token);
 
                     print(
